@@ -46,7 +46,7 @@ jobs:
             rust: nightly # For checking the minimum version dependencies.
           - runner: macos-14 # macOS arm64 (3 x vCPU)
             rust: stable
-            test-args: --test-threads=3
+            test-args: --test-threads=1
     runs-on: ${{ matrix.platform.runner }}
 
     steps:
