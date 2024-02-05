@@ -44,8 +44,9 @@ jobs:
             rust: 1.65.0 # MSRV
           - runner: ubuntu-latest
             rust: nightly # For checking the minimum version dependencies.
-          - runner: macos-14 # macOS arm64
+          - runner: macos-14 # macOS arm64 (3 x vCPU)
             rust: stable
+            test-args: --test-threads=3
     runs-on: ${{ matrix.platform.runner }}
 
     steps:
@@ -74,20 +75,30 @@ jobs:
         run: ./.ci_extras/remove-examples-msrv.sh
 
       - name: Run tests (debug, but no quanta feature)
-        run: cargo test --no-default-features --features 'sync, atomic64'
+        run: |
+          cargo test --no-default-features --features 'sync, atomic64' \
+            -- ${{ matrix.platform.test-args }}
         env:
           RUSTFLAGS: '--cfg rustver'
 
       - name: Run tests (release, but no quanta feature)
-        run: cargo test --release --no-default-features --features 'sync, atomic64'
+        run: |
+          cargo test --release --no-default-features --features 'sync, atomic64' \
+            -- ${{ matrix.platform.test-args }}
         env:
           RUSTFLAGS: '--cfg rustver'
 
       - name: Run tests (future feature, but no quanta and sync features)
-        run: cargo test --no-default-features --features 'future, atomic64'
+        run: |
+          cargo test --no-default-features --features 'future, atomic64' \
+            -- ${{ matrix.platform.test-args }}
 
       - name: Run tests (future, sync and logging features, but no quanta feature)
-        run: cargo test --no-default-features --features 'sync, future, atomic64, logging'
+        run: |
+          cargo test --no-default-features --features 'sync, future, atomic64, logging' \
+            -- ${{ matrix.platform.test-args }}
 
       - name: Run tests (sync feature, but no quanta feature, drop cache)
-        run: cargo test --release --lib --no-default-features --features sync sync::cache::tests::ensure_gc_runs_when_dropping_cache -- --exact --ignored
+        run: |
+          cargo test --release --lib --no-default-features --features sync sync::cache::tests::ensure_gc_runs_when_dropping_cache \
+            -- --exact --ignored ${{ matrix.platform.test-args }}
