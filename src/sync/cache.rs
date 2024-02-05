@@ -3200,6 +3200,8 @@ mod tests {
         let cache = Cache::new(100);
         const KEY: &u32 = &0;
 
+        let barrier = Arc::new(Barrier::new(5));
+
         // This test will run five threads:
         //
         // Thread1 will be the first thread to call `get_with_by_ref` for a key, so
@@ -3207,7 +3209,9 @@ mod tests {
         // inserted to the cache.
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 // Call `get_with_by_ref` immediately.
                 let v = cache1.get_with_by_ref(KEY, || {
                     // Wait for 300 ms and return a &str value.
@@ -3224,7 +3228,9 @@ mod tests {
         // closure.
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 // Wait for 100 ms before calling `get_with_by_ref`.
                 sleep(Duration::from_millis(100));
                 let v = cache2.get_with_by_ref(KEY, || unreachable!());
@@ -3239,7 +3245,9 @@ mod tests {
         // init closure immediately.
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 // Wait for 400 ms before calling `get_with_by_ref`.
                 sleep(Duration::from_millis(400));
                 let v = cache3.get_with_by_ref(KEY, || unreachable!());
@@ -3251,7 +3259,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 // Wait for 200 ms before calling `get`.
                 sleep(Duration::from_millis(200));
                 let maybe_v = cache4.get(KEY);
@@ -3263,7 +3273,9 @@ mod tests {
         // closure finished, so it will get the value insert by thread1's init closure.
         let thread5 = {
             let cache5 = cache.clone();
+            let barrier5 = Arc::clone(&barrier);
             spawn(move || {
+                barrier5.wait();
                 // Wait for 400 ms before calling `get`.
                 sleep(Duration::from_millis(400));
                 let maybe_v = cache5.get(KEY);
@@ -3285,6 +3297,8 @@ mod tests {
         let cache = Cache::new(100);
         const KEY: u32 = 0;
 
+        let barrier = Arc::new(Barrier::new(7));
+
         // This test will run seven threads:
         //
         // Thread1 will be the first thread to call `or_insert_with_if` for a key, so
@@ -3292,7 +3306,9 @@ mod tests {
         // inserted to the cache.
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 // Call `get_with` immediately.
                 let entry = cache1.entry(KEY).or_insert_with_if(
                     || {
@@ -3315,7 +3331,9 @@ mod tests {
         // closure.
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 // Wait for 100 ms before calling `get_with`.
                 sleep(Duration::from_millis(100));
                 let entry = cache2
@@ -3336,7 +3354,9 @@ mod tests {
         // immediately.
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 // Wait for 350 ms before calling `or_insert_with_if`.
                 sleep(Duration::from_millis(350));
                 let entry = cache3.entry(KEY).or_insert_with_if(
@@ -3357,7 +3377,9 @@ mod tests {
         // will be evaluated to replace the current value.
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 // Wait for 400 ms before calling `or_insert_with_if`.
                 sleep(Duration::from_millis(400));
                 let entry = cache4.entry(KEY).or_insert_with_if(
@@ -3376,7 +3398,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread5 = {
             let cache5 = cache.clone();
+            let barrier5 = Arc::clone(&barrier);
             spawn(move || {
+                barrier5.wait();
                 // Wait for 200 ms before calling `get`.
                 sleep(Duration::from_millis(200));
                 let maybe_v = cache5.get(&KEY);
@@ -3388,7 +3412,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread6 = {
             let cache6 = cache.clone();
+            let barrier6 = Arc::clone(&barrier);
             spawn(move || {
+                barrier6.wait();
                 // Wait for 350 ms before calling `get`.
                 sleep(Duration::from_millis(350));
                 let maybe_v = cache6.get(&KEY);
@@ -3400,7 +3426,9 @@ mod tests {
         // closure finished, so it will get the value insert by thread1's init closure.
         let thread7 = {
             let cache7 = cache.clone();
+            let barrier7 = Arc::clone(&barrier);
             spawn(move || {
+                barrier7.wait();
                 // Wait for 450 ms before calling `get`.
                 sleep(Duration::from_millis(450));
                 let maybe_v = cache7.get(&KEY);
@@ -3424,6 +3452,8 @@ mod tests {
         let cache: Cache<u32, &str> = Cache::new(100);
         const KEY: &u32 = &0;
 
+        let barrier = Arc::new(Barrier::new(7));
+
         // This test will run seven threads:
         //
         // Thread1 will be the first thread to call `or_insert_with_if` for a key, so
@@ -3431,7 +3461,9 @@ mod tests {
         // inserted to the cache.
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 // Call `get_with` immediately.
                 let v = cache1
                     .entry_by_ref(KEY)
@@ -3454,7 +3486,9 @@ mod tests {
         // closure.
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 // Wait for 100 ms before calling `get_with`.
                 sleep(Duration::from_millis(100));
                 let v = cache2
@@ -3473,7 +3507,9 @@ mod tests {
         // immediately.
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 // Wait for 350 ms before calling `or_insert_with_if`.
                 sleep(Duration::from_millis(350));
                 let v = cache3
@@ -3496,7 +3532,9 @@ mod tests {
         // init closure will be evaluated to replace the current value.
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 // Wait for 400 ms before calling `or_insert_with_if`.
                 sleep(Duration::from_millis(400));
                 let v = cache4
@@ -3517,7 +3555,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread5 = {
             let cache5 = cache.clone();
+            let barrier5 = Arc::clone(&barrier);
             spawn(move || {
+                barrier5.wait();
                 // Wait for 200 ms before calling `get`.
                 sleep(Duration::from_millis(200));
                 let maybe_v = cache5.get(KEY);
@@ -3529,7 +3569,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread6 = {
             let cache6 = cache.clone();
+            let barrier6 = Arc::clone(&barrier);
             spawn(move || {
+                barrier6.wait();
                 // Wait for 350 ms before calling `get`.
                 sleep(Duration::from_millis(350));
                 let maybe_v = cache6.get(KEY);
@@ -3541,7 +3583,9 @@ mod tests {
         // closure finished, so it will get the value insert by thread1's init closure.
         let thread7 = {
             let cache7 = cache.clone();
+            let barrier7 = Arc::clone(&barrier);
             spawn(move || {
+                barrier7.wait();
                 // Wait for 450 ms before calling `get`.
                 sleep(Duration::from_millis(450));
                 let maybe_v = cache7.get(KEY);
@@ -3575,6 +3619,8 @@ mod tests {
         let cache = Cache::new(100);
         const KEY: u32 = 0;
 
+        let barrier = Arc::new(Barrier::new(8));
+
         // This test will run eight threads:
         //
         // Thread1 will be the first thread to call `try_get_with` for a key, so its
@@ -3582,7 +3628,9 @@ mod tests {
         // will be inserted to the cache.
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 // Call `try_get_with` immediately.
                 let v = cache1.try_get_with(KEY, || {
                     // Wait for 300 ms and return an error.
@@ -3599,7 +3647,9 @@ mod tests {
         // closure.
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 // Wait for 100 ms before calling `try_get_with`.
                 sleep(Duration::from_millis(100));
                 let v: MyResult<_> = cache2.try_get_with(KEY, || unreachable!());
@@ -3614,7 +3664,9 @@ mod tests {
         // inserted to the cache.
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 // Wait for 400 ms before calling `try_get_with`.
                 sleep(Duration::from_millis(400));
                 let v: MyResult<_> = cache3.try_get_with(KEY, || {
@@ -3631,7 +3683,9 @@ mod tests {
         // closure finishes, it will get the same okay &str value.
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 // Wait for 500 ms before calling `try_get_with`.
                 sleep(Duration::from_millis(500));
                 let v: MyResult<_> = cache4.try_get_with(KEY, || unreachable!());
@@ -3646,7 +3700,9 @@ mod tests {
         // closure immediately.
         let thread5 = {
             let cache5 = cache.clone();
+            let barrier5 = Arc::clone(&barrier);
             spawn(move || {
+                barrier5.wait();
                 // Wait for 800 ms before calling `try_get_with`.
                 sleep(Duration::from_millis(800));
                 let v: MyResult<_> = cache5.try_get_with(KEY, || unreachable!());
@@ -3658,7 +3714,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread6 = {
             let cache6 = cache.clone();
+            let barrier6 = Arc::clone(&barrier);
             spawn(move || {
+                barrier6.wait();
                 // Wait for 200 ms before calling `get`.
                 sleep(Duration::from_millis(200));
                 let maybe_v = cache6.get(&KEY);
@@ -3670,7 +3728,9 @@ mod tests {
         // closure finished with an error. So it will get none for the key.
         let thread7 = {
             let cache7 = cache.clone();
+            let barrier7 = Arc::clone(&barrier);
             spawn(move || {
+                barrier7.wait();
                 // Wait for 400 ms before calling `get`.
                 sleep(Duration::from_millis(400));
                 let maybe_v = cache7.get(&KEY);
@@ -3682,7 +3742,9 @@ mod tests {
         // closure finished, so it will get the value insert by thread3's init closure.
         let thread8 = {
             let cache8 = cache.clone();
+            let barrier8 = Arc::clone(&barrier);
             spawn(move || {
+                barrier8.wait();
                 // Wait for 800 ms before calling `get`.
                 sleep(Duration::from_millis(800));
                 let maybe_v = cache8.get(&KEY);
@@ -3716,6 +3778,8 @@ mod tests {
         let cache = Cache::new(100);
         const KEY: &u32 = &0;
 
+        let barrier = Arc::new(Barrier::new(8));
+
         // This test will run eight threads:
         //
         // Thread1 will be the first thread to call `try_get_with_by_ref` for a key,
@@ -3723,7 +3787,9 @@ mod tests {
         // Nothing will be inserted to the cache.
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 // Call `try_get_with_by_ref` immediately.
                 let v = cache1.try_get_with_by_ref(KEY, || {
                     // Wait for 300 ms and return an error.
@@ -3740,7 +3806,9 @@ mod tests {
         // init closure.
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 // Wait for 100 ms before calling `try_get_with_by_ref`.
                 sleep(Duration::from_millis(100));
                 let v: MyResult<_> = cache2.try_get_with_by_ref(KEY, || unreachable!());
@@ -3755,7 +3823,9 @@ mod tests {
         // inserted to the cache.
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 // Wait for 400 ms before calling `try_get_with_by_ref`.
                 sleep(Duration::from_millis(400));
                 let v: MyResult<_> = cache3.try_get_with_by_ref(KEY, || {
@@ -3772,7 +3842,9 @@ mod tests {
         // closure finishes, it will get the same okay &str value.
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 // Wait for 500 ms before calling `try_get_with_by_ref`.
                 sleep(Duration::from_millis(500));
                 let v: MyResult<_> = cache4.try_get_with_by_ref(KEY, || unreachable!());
@@ -3787,7 +3859,9 @@ mod tests {
         // closure immediately.
         let thread5 = {
             let cache5 = cache.clone();
+            let barrier5 = Arc::clone(&barrier);
             spawn(move || {
+                barrier5.wait();
                 // Wait for 800 ms before calling `try_get_with_by_ref`.
                 sleep(Duration::from_millis(800));
                 let v: MyResult<_> = cache5.try_get_with_by_ref(KEY, || unreachable!());
@@ -3799,7 +3873,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread6 = {
             let cache6 = cache.clone();
+            let barrier6 = Arc::clone(&barrier);
             spawn(move || {
+                barrier6.wait();
                 // Wait for 200 ms before calling `get`.
                 sleep(Duration::from_millis(200));
                 let maybe_v = cache6.get(KEY);
@@ -3811,7 +3887,9 @@ mod tests {
         // closure finished with an error. So it will get none for the key.
         let thread7 = {
             let cache7 = cache.clone();
+            let barrier7 = Arc::clone(&barrier);
             spawn(move || {
+                barrier7.wait();
                 // Wait for 400 ms before calling `get`.
                 sleep(Duration::from_millis(400));
                 let maybe_v = cache7.get(KEY);
@@ -3823,7 +3901,9 @@ mod tests {
         // closure finished, so it will get the value insert by thread3's init closure.
         let thread8 = {
             let cache8 = cache.clone();
+            let barrier8 = Arc::clone(&barrier);
             spawn(move || {
+                barrier8.wait();
                 // Wait for 800 ms before calling `get`.
                 sleep(Duration::from_millis(800));
                 let maybe_v = cache8.get(KEY);
@@ -3847,6 +3927,8 @@ mod tests {
         let cache = Cache::new(100);
         const KEY: u32 = 0;
 
+        let barrier = Arc::new(Barrier::new(8));
+
         // This test will run eight threads:
         //
         // Thread1 will be the first thread to call `optionally_get_with` for a key,
@@ -3854,7 +3936,9 @@ mod tests {
         // Nothing will be inserted to the cache.
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 // Call `optionally_get_with` immediately.
                 let v = cache1.optionally_get_with(KEY, || {
                     // Wait for 300 ms and return an error.
@@ -3871,7 +3955,9 @@ mod tests {
         // init closure.
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 // Wait for 100 ms before calling `optionally_get_with`.
                 sleep(Duration::from_millis(100));
                 let v = cache2.optionally_get_with(KEY, || unreachable!());
@@ -3886,7 +3972,9 @@ mod tests {
         // inserted to the cache.
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 // Wait for 400 ms before calling `optionally_get_with`.
                 sleep(Duration::from_millis(400));
                 let v = cache3.optionally_get_with(KEY, || {
@@ -3903,7 +3991,9 @@ mod tests {
         // closure finishes, it will get the same okay &str value.
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 // Wait for 500 ms before calling `optionally_get_with`.
                 sleep(Duration::from_millis(500));
                 let v = cache4.optionally_get_with(KEY, || unreachable!());
@@ -3918,7 +4008,9 @@ mod tests {
         // closure immediately.
         let thread5 = {
             let cache5 = cache.clone();
+            let barrier5 = Arc::clone(&barrier);
             spawn(move || {
+                barrier5.wait();
                 // Wait for 800 ms before calling `optionally_get_with`.
                 sleep(Duration::from_millis(800));
                 let v = cache5.optionally_get_with(KEY, || unreachable!());
@@ -3930,7 +4022,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread6 = {
             let cache6 = cache.clone();
+            let barrier6 = Arc::clone(&barrier);
             spawn(move || {
+                barrier6.wait();
                 // Wait for 200 ms before calling `get`.
                 sleep(Duration::from_millis(200));
                 let maybe_v = cache6.get(&KEY);
@@ -3942,7 +4036,9 @@ mod tests {
         // closure finished with an error. So it will get none for the key.
         let thread7 = {
             let cache7 = cache.clone();
+            let barrier7 = Arc::clone(&barrier);
             spawn(move || {
+                barrier7.wait();
                 // Wait for 400 ms before calling `get`.
                 sleep(Duration::from_millis(400));
                 let maybe_v = cache7.get(&KEY);
@@ -3954,7 +4050,9 @@ mod tests {
         // closure finished, so it will get the value insert by thread3's init closure.
         let thread8 = {
             let cache8 = cache.clone();
+            let barrier8 = Arc::clone(&barrier);
             spawn(move || {
+                barrier8.wait();
                 // Wait for 800 ms before calling `get`.
                 sleep(Duration::from_millis(800));
                 let maybe_v = cache8.get(&KEY);
@@ -3978,6 +4076,8 @@ mod tests {
         let cache = Cache::new(100);
         const KEY: &u32 = &0;
 
+        let barrier = Arc::new(Barrier::new(8));
+
         // This test will run eight threads:
         //
         // Thread1 will be the first thread to call `optionally_get_with_by_ref` for
@@ -3985,7 +4085,9 @@ mod tests {
         // returned. Nothing will be inserted to the cache.
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 // Call `optionally_get_with_by_ref` immediately.
                 let v = cache1.optionally_get_with_by_ref(KEY, || {
                     // Wait for 300 ms and return an error.
@@ -4002,7 +4104,9 @@ mod tests {
         // thread1's init closure.
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 // Wait for 100 ms before calling `optionally_get_with_by_ref`.
                 sleep(Duration::from_millis(100));
                 let v = cache2.optionally_get_with_by_ref(KEY, || unreachable!());
@@ -4017,7 +4121,9 @@ mod tests {
         // inserted to the cache.
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 // Wait for 400 ms before calling `optionally_get_with_by_ref`.
                 sleep(Duration::from_millis(400));
                 let v = cache3.optionally_get_with_by_ref(KEY, || {
@@ -4034,7 +4140,9 @@ mod tests {
         // init closure finishes, it will get the same okay &str value.
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 // Wait for 500 ms before calling `optionally_get_with_by_ref`.
                 sleep(Duration::from_millis(500));
                 let v = cache4.optionally_get_with_by_ref(KEY, || unreachable!());
@@ -4049,7 +4157,9 @@ mod tests {
         // init closure immediately.
         let thread5 = {
             let cache5 = cache.clone();
+            let barrier5 = Arc::clone(&barrier);
             spawn(move || {
+                barrier5.wait();
                 // Wait for 800 ms before calling `optionally_get_with_by_ref`.
                 sleep(Duration::from_millis(800));
                 let v = cache5.optionally_get_with_by_ref(KEY, || unreachable!());
@@ -4061,7 +4171,9 @@ mod tests {
         // closure is still running, so it will get none for the key.
         let thread6 = {
             let cache6 = cache.clone();
+            let barrier6 = Arc::clone(&barrier);
             spawn(move || {
+                barrier6.wait();
                 // Wait for 200 ms before calling `get`.
                 sleep(Duration::from_millis(200));
                 let maybe_v = cache6.get(KEY);
@@ -4073,7 +4185,9 @@ mod tests {
         // closure finished with an error. So it will get none for the key.
         let thread7 = {
             let cache7 = cache.clone();
+            let barrier7 = Arc::clone(&barrier);
             spawn(move || {
+                barrier7.wait();
                 // Wait for 400 ms before calling `get`.
                 sleep(Duration::from_millis(400));
                 let maybe_v = cache7.get(KEY);
@@ -4085,7 +4199,9 @@ mod tests {
         // closure finished, so it will get the value insert by thread3's init closure.
         let thread8 = {
             let cache8 = cache.clone();
+            let barrier8 = Arc::clone(&barrier);
             spawn(move || {
+                barrier8.wait();
                 // Wait for 800 ms before calling `get`.
                 sleep(Duration::from_millis(800));
                 let maybe_v = cache8.get(KEY);
@@ -4109,6 +4225,8 @@ mod tests {
         let cache = Cache::new(100);
         const KEY: u32 = 0;
 
+        let barrier = Arc::new(Barrier::new(3));
+
         // Spawn three threads to call `and_upsert_with` for the same key and each
         // task increments the current value by 1. Ensure the key-level lock is
         // working by verifying the value is 3 after all threads finish.
@@ -4126,7 +4244,9 @@ mod tests {
 
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 cache1.entry(KEY).and_upsert_with(|maybe_entry| {
                     sleep(Duration::from_millis(200));
                     assert!(maybe_entry.is_none());
@@ -4137,7 +4257,9 @@ mod tests {
 
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 sleep(Duration::from_millis(100));
                 cache2.entry_by_ref(&KEY).and_upsert_with(|maybe_entry| {
                     sleep(Duration::from_millis(200));
@@ -4149,7 +4271,9 @@ mod tests {
 
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 sleep(Duration::from_millis(300));
                 cache3.entry_by_ref(&KEY).and_upsert_with(|maybe_entry| {
                     sleep(Duration::from_millis(100));
@@ -4182,6 +4306,8 @@ mod tests {
         let cache = Cache::new(100);
         const KEY: u32 = 0;
 
+        let barrier = Arc::new(Barrier::new(6));
+
         // Spawn six threads to call `and_compute_with` for the same key. Ensure the
         // key-level lock is working by verifying the value after all threads finish.
         //
@@ -4207,7 +4333,9 @@ mod tests {
 
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 cache1.entry(KEY).and_compute_with(|maybe_entry| {
                     sleep(Duration::from_millis(200));
                     assert!(maybe_entry.is_none());
@@ -4218,7 +4346,9 @@ mod tests {
 
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 sleep(Duration::from_millis(100));
                 cache2.entry_by_ref(&KEY).and_compute_with(|maybe_entry| {
                     let entry = maybe_entry.expect("The entry should exist");
@@ -4233,7 +4363,9 @@ mod tests {
 
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 sleep(Duration::from_millis(300));
                 cache3.entry(KEY).and_compute_with(|maybe_entry| {
                     let entry = maybe_entry.expect("The entry should exist");
@@ -4247,7 +4379,9 @@ mod tests {
 
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 sleep(Duration::from_millis(500));
                 cache4.entry(KEY).and_compute_with(|maybe_entry| {
                     assert!(maybe_entry.is_none());
@@ -4259,7 +4393,9 @@ mod tests {
 
         let thread5 = {
             let cache5 = cache.clone();
+            let barrier5 = Arc::clone(&barrier);
             spawn(move || {
+                barrier5.wait();
                 sleep(Duration::from_millis(700));
                 cache5.entry_by_ref(&KEY).and_compute_with(|maybe_entry| {
                     assert!(maybe_entry.is_none());
@@ -4271,7 +4407,9 @@ mod tests {
 
         let thread6 = {
             let cache6 = cache.clone();
+            let barrier6 = Arc::clone(&barrier);
             spawn(move || {
+                barrier6.wait();
                 sleep(Duration::from_millis(900));
                 cache6.entry_by_ref(&KEY).and_compute_with(|maybe_entry| {
                     let entry = maybe_entry.expect("The entry should exist");
@@ -4337,6 +4475,8 @@ mod tests {
         let cache: Cache<u32, Arc<RwLock<Vec<i32>>>> = Cache::new(100);
         const KEY: u32 = 0;
 
+        let barrier = Arc::new(Barrier::new(4));
+
         // Spawn four threads to call `and_try_compute_with` for the same key. Ensure
         // the key-level lock is working by verifying the value after all threads
         // finish.
@@ -4360,7 +4500,9 @@ mod tests {
 
         let thread1 = {
             let cache1 = cache.clone();
+            let barrier1 = Arc::clone(&barrier);
             spawn(move || {
+                barrier1.wait();
                 cache1.entry(KEY).and_try_compute_with(|maybe_entry| {
                     sleep(Duration::from_millis(200));
                     assert!(maybe_entry.is_none());
@@ -4371,7 +4513,9 @@ mod tests {
 
         let thread2 = {
             let cache2 = cache.clone();
+            let barrier2 = Arc::clone(&barrier);
             spawn(move || {
+                barrier2.wait();
                 sleep(Duration::from_millis(100));
                 cache2
                     .entry_by_ref(&KEY)
@@ -4388,7 +4532,9 @@ mod tests {
 
         let thread3 = {
             let cache3 = cache.clone();
+            let barrier3 = Arc::clone(&barrier);
             spawn(move || {
+                barrier3.wait();
                 sleep(Duration::from_millis(300));
                 cache3.entry(KEY).and_try_compute_with(|maybe_entry| {
                     let entry = maybe_entry.expect("The entry should exist");
@@ -4402,7 +4548,9 @@ mod tests {
 
         let thread4 = {
             let cache4 = cache.clone();
+            let barrier4 = Arc::clone(&barrier);
             spawn(move || {
+                barrier4.wait();
                 sleep(Duration::from_millis(500));
                 cache4.entry(KEY).and_try_compute_with(|maybe_entry| {
                     let entry = maybe_entry.expect("The entry should exist");
@@ -4720,6 +4868,8 @@ mod tests {
         // Make the cache exterior immutable.
         let cache = cache;
 
+        let barrier = Arc::new(Barrier::new(3));
+
         // - Notifications for the same key must not overlap.
 
         // Time  Event
@@ -4758,8 +4908,10 @@ mod tests {
         // 0500: Insert value a1 -> expired a0 (N-A0)
         let thread1 = {
             let a1 = Arc::clone(&actual);
+            let b1 = Arc::clone(&barrier);
             let c1 = cache.clone();
             spawn(move || {
+                b1.wait();
                 sleep(Duration::from_millis(600));
                 a1.lock().push(Event::Insert("a1"));
                 c1.insert(KEY, "a1");
@@ -4769,8 +4921,10 @@ mod tests {
         // 0800: Insert value a2 (waiting) (A-A2)
         let thread2 = {
             let a2 = Arc::clone(&actual);
+            let b2 = Arc::clone(&barrier);
             let c2 = cache.clone();
             spawn(move || {
+                b2.wait();
                 sleep(Duration::from_millis(800));
                 a2.lock().push(Event::Insert("a2"));
                 c2.insert(KEY, "a2");
@@ -4780,8 +4934,10 @@ mod tests {
         // 1100: Invalidate (waiting) (R-A2)
         let thread3 = {
             let a3 = Arc::clone(&actual);
+            let b3 = Arc::clone(&barrier);
             let c3 = cache.clone();
             spawn(move || {
+                b3.wait();
                 sleep(Duration::from_millis(1100));
                 a3.lock().push(Event::Invalidate("a2"));
                 c3.invalidate(&KEY);
