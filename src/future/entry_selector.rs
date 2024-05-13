@@ -474,6 +474,67 @@ where
             .await
     }
 
+    /// Returns the corresponding [`Entry`] for the key given when this entry
+    /// selector was constructed. If the entry does not exist, resolves the `init`
+    /// future and inserts the output.
+    ///
+    /// [`Entry`]: ../struct.Entry.html
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// // Cargo.toml
+    /// //
+    /// // [dependencies]
+    /// // moka = { version = "0.12", features = ["future"] }
+    /// // tokio = { version = "1", features = ["rt-multi-thread", "macros" ] }
+    ///
+    /// use moka::future::Cache;
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let cache: Cache<String, String> = Cache::new(100);
+    ///     let key = "key1".to_string();
+    ///
+    ///     let entry = cache
+    ///         .entry(key.clone())
+    ///         .or_insert_with(async { "value1".to_string() })
+    ///         .await;
+    ///     assert!(entry.is_fresh());
+    ///     assert_eq!(entry.key(), &key);
+    ///     assert_eq!(entry.into_value(), "value1");
+    ///
+    ///     let entry = cache
+    ///         .entry(key)
+    ///         .or_insert_with(async { "value2".to_string() })
+    ///         .await;
+    ///     // Not fresh because the value was already in the cache.
+    ///     assert!(!entry.is_fresh());
+    ///     assert_eq!(entry.into_value(), "value1");
+    /// }
+    /// ```
+    ///
+    /// # Concurrent calls on the same key
+    ///
+    /// This method guarantees that concurrent calls on the same not-existing entry
+    /// are coalesced into one evaluation of the `init` future. Only one of the calls
+    /// evaluates its future (thus returned entry's `is_fresh` method returns
+    /// `true`), and other calls wait for that future to resolve (and their
+    /// `is_fresh` return `false`).
+    ///
+    /// For more detail about the coalescing behavior, see
+    /// [`Cache::get_with`][get-with-method].
+    ///
+    /// [get-with-method]: ./struct.Cache.html#method.get_with
+    pub async fn or_insert_with_send(self, init: impl Future<Output = V> + Send) -> Entry<K, V> {
+        futures_util::pin_mut!(init);
+        let key = Arc::new(self.owned_key);
+        let replace_if = None as Option<fn(&V) -> bool>;
+        self.cache
+            .get_or_insert_with_hash_and_fun(key, self.hash, init, replace_if, true)
+            .await
+    }
+
     /// Works like [`or_insert_with`](#method.or_insert_with), but takes an additional
     /// `replace_if` closure.
     ///
